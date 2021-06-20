@@ -1,18 +1,16 @@
 import * as PIXI from 'pixi.js';
 import { Ticker, UPDATE_PRIORITY } from 'pixi.js';
 import { addStats, StatsJSAdapter } from 'pixi-stats';
-import {
-	drawSizedContainer,
-	drawSizedContainerWithSprite,
-} from './scripts/containerUtils';
+import { drawSizedContainerWithSprite } from './scripts/containerUtils';
 import { getRandomInt } from './scripts/utils';
+import { loadImages } from './scripts/spriteUtils';
 
 const WIDTH = 200;
 const HEIGHT = 150;
-const LOAD_COUNT = 10;
+let UNIQUE_IMAGE = 10;
+let TOTAL_IMAGE_COUNT = 10;
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
-import { loadImages } from './scripts/spriteUtils';
 
 const ticker: Ticker = Ticker.shared;
 const app = new PIXI.Application({
@@ -22,12 +20,40 @@ const app = new PIXI.Application({
 });
 document.body.appendChild(app.view);
 
+const increaseUniqueImageCount = document.querySelector(
+	'.increase-unique-image-count'
+);
+const decreaseUniqueImageCount = document.querySelector(
+	'.decrease-unique-image-count'
+);
+const uniqueImageCount = document.querySelector('.unique-image-count')!;
+const totalImageCount = document.querySelector('.total-image-count')!;
+
+function attachListeners() {
+	increaseUniqueImageCount?.addEventListener('click', function () {
+		UNIQUE_IMAGE += 10;
+		UNIQUE_IMAGE = Math.min(500, UNIQUE_IMAGE);
+		updateUI();
+	});
+	decreaseUniqueImageCount?.addEventListener('click', function () {
+		UNIQUE_IMAGE -= 10;
+		UNIQUE_IMAGE = Math.max(10, UNIQUE_IMAGE);
+		updateUI();
+	});
+}
+
+function updateUI() {
+	uniqueImageCount.textContent = UNIQUE_IMAGE.toString();
+	totalImageCount.textContent = TOTAL_IMAGE_COUNT.toString();
+}
+
 async function preload(): Promise<Array<HTMLImageElement>> {
-	const imageElementCollection = await loadImages(LOAD_COUNT);
+	const imageElementCollection = await loadImages(UNIQUE_IMAGE);
 	return imageElementCollection;
 }
 
 async function main() {
+	attachListeners();
 	const imageElementCollection = await preload();
 	function atEachTick() {
 		const children = app.stage.children;
@@ -37,7 +63,7 @@ async function main() {
 				children: true,
 			});
 		}
-		for (let i = 0; i < LOAD_COUNT; i++) {
+		for (let i = 0; i < TOTAL_IMAGE_COUNT; i++) {
 			const width = getRandomInt(WIDTH - 100, WIDTH);
 			const height = getRandomInt(HEIGHT - 100, HEIGHT);
 
