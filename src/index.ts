@@ -20,32 +20,16 @@ const app = new PIXI.Application({
 });
 document.body.appendChild(app.view);
 
-const increaseUniqueImageCount = document.querySelector(
-	'.increase-unique-image-count'
-);
-const decreaseUniqueImageCount = document.querySelector(
-	'.decrease-unique-image-count'
-);
-const uniqueImageCount = document.querySelector('.unique-image-count')!;
-const totalImageCount = document.querySelector('.total-image-count')!;
-
-function attachListeners() {
-	increaseUniqueImageCount?.addEventListener('click', function () {
-		UNIQUE_IMAGE += 10;
-		UNIQUE_IMAGE = Math.min(500, UNIQUE_IMAGE);
-		updateUI();
-	});
-	decreaseUniqueImageCount?.addEventListener('click', function () {
-		UNIQUE_IMAGE -= 10;
-		UNIQUE_IMAGE = Math.max(10, UNIQUE_IMAGE);
-		updateUI();
-	});
+function fromLocation() {
+	const url = new URL(window.location.href);
+	const left = url.search.substring(1);
+	const uniqueAndTotal = left.split('&');
+	const unique = uniqueAndTotal[0].replace('unique=', '');
+	const total = uniqueAndTotal[1].replace('total=', '');
+	UNIQUE_IMAGE = parseInt(unique, 10);
+	TOTAL_IMAGE_COUNT = parseInt(total, 10);
 }
-
-function updateUI() {
-	uniqueImageCount.textContent = UNIQUE_IMAGE.toString();
-	totalImageCount.textContent = TOTAL_IMAGE_COUNT.toString();
-}
+fromLocation();
 
 async function preload(): Promise<Array<HTMLImageElement>> {
 	const imageElementCollection = await loadImages(UNIQUE_IMAGE);
@@ -53,7 +37,6 @@ async function preload(): Promise<Array<HTMLImageElement>> {
 }
 
 async function main() {
-	attachListeners();
 	const imageElementCollection = await preload();
 	function atEachTick() {
 		const children = app.stage.children;
