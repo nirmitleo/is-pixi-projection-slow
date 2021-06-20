@@ -28,6 +28,7 @@ function fromLocation() {
 	const total = uniqueAndTotal[1].replace('total=', '');
 	UNIQUE_IMAGE = parseInt(unique, 10);
 	TOTAL_IMAGE_COUNT = parseInt(total, 10);
+	TOTAL_IMAGE_COUNT = Math.max(TOTAL_IMAGE_COUNT, UNIQUE_IMAGE);
 }
 fromLocation();
 
@@ -36,31 +37,51 @@ async function preload(): Promise<Array<HTMLImageElement>> {
 	return imageElementCollection;
 }
 
+function addContainers(
+	imageElementCollection: Array<HTMLImageElement>
+): Array<PIXI.Container> {
+	const containerCollection = [];
+	for (let i = 0; i < TOTAL_IMAGE_COUNT; i++) {
+		const width = getRandomInt(WIDTH - 100, WIDTH);
+		const height = getRandomInt(HEIGHT - 100, HEIGHT);
+
+		const x = getRandomInt(0, CANVAS_WIDTH - width);
+		const y = getRandomInt(0, CANVAS_HEIGHT - height);
+		const container = drawSizedContainerWithSprite({
+			width,
+			height,
+			image: imageElementCollection[i],
+		});
+
+		container.x = x;
+		container.y = y;
+
+		containerCollection.push(container);
+	}
+	return containerCollection;
+}
+
+function changePosition(containerCollection: Array<PIXI.Container>): void {
+	for (let i = 0; i < containerCollection.length; i++) {
+		const container = containerCollection[i];
+		const width = container.width;
+		const height = container.height;
+		const x = getRandomInt(0, CANVAS_WIDTH - width);
+		const y = getRandomInt(0, CANVAS_HEIGHT - height);
+		container.x = x;
+		container.y = y;
+	}
+}
+
 async function main() {
 	const imageElementCollection = await preload();
+	const containerCollection = addContainers(imageElementCollection);
 	function atEachTick() {
-		const children = app.stage.children;
-		for (let i = 0; i < children.length; i++) {
-			const child = children[i];
-			child.destroy({
-				children: true,
-			});
-		}
-		for (let i = 0; i < TOTAL_IMAGE_COUNT; i++) {
-			const width = getRandomInt(WIDTH - 100, WIDTH);
-			const height = getRandomInt(HEIGHT - 100, HEIGHT);
+		app.stage.removeChildren();
 
-			const x = getRandomInt(0, CANVAS_WIDTH - width);
-			const y = getRandomInt(0, CANVAS_HEIGHT - height);
-			const container = drawSizedContainerWithSprite({
-				width,
-				height,
-				image: imageElementCollection[i],
-			});
-
-			container.x = x;
-			container.y = y;
-
+		changePosition(containerCollection);
+		for (let i = 0; i < containerCollection.length; i++) {
+			const container = containerCollection[i];
 			app.stage.addChild(container);
 		}
 	}
