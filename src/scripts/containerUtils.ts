@@ -19,3 +19,22 @@ export function drawSizedContainer({
 	container.addChild(whiteSprite);
 	return container;
 }
+
+export function drawSizedContainerWithSprite({
+	width,
+	height,
+	image,
+}: {
+	width: number;
+	height: number;
+	image: HTMLImageElement;
+}) {
+	const container = new PIXI.Container();
+
+	const sprite = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(image)));
+	sprite.width = width;
+	sprite.height = height;
+
+	container.addChild(sprite);
+	return container;
+}
